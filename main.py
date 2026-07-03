@@ -1,4 +1,6 @@
+import datetime
 import os
+import shutil
 import sys
 import json
 import subprocess
@@ -94,6 +96,12 @@ def patch_local_state(user_data_path, last_version):
         print('Failed to patch Local State. File not found', local_state_file)
         return
 
+    # backup Local State
+    now_yyyymmddhhmmss = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    backup_local_state_file = os.path.join(user_data_path, f'Local State.{now_yyyymmddhhmmss}.bak')
+    if not os.path.exists(backup_local_state_file):
+        shutil.copy2(local_state_file, backup_local_state_file)
+
     with open(local_state_file, 'r', encoding='utf-8') as fp:
         local_state = json.load(fp)
 
@@ -147,12 +155,12 @@ def main():
         print('Patching Chrome', version, last_version, '"'+user_data_path+'"')
         patch_local_state(user_data_path, last_version)
 
-    if len(terminated_chromes) > 0:
-        print('Restart Chrome')
-        for chrome in terminated_chromes:
-            subprocess.Popen([chrome], stderr=subprocess.DEVNULL)
+    # if len(terminated_chromes) > 0:
+    #     print('Restart Chrome')
+    #     for chrome in terminated_chromes:
+    #         subprocess.Popen([chrome], stderr=subprocess.DEVNULL)
 
-    input('Enter to continue...')
+    # input('Enter to continue...')
 
 
 if __name__ == '__main__':
